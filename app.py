@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 import joblib
-import pandas as pd
+import polars as pl
 import numpy as np
 import os
 from pathlib import Path
@@ -75,14 +75,20 @@ def predict():
             'Neighborhood': str(data.get('Neighborhood', 'Ames'))
         }
         
-        # Create a DataFrame with the features
-        input_df = pd.DataFrame([features_dict])
+        # Create a Polars DataFrame with the features
+        input_df = pl.DataFrame([features_dict])
+        
+        # Convert to pandas for sklearn's get_dummies
+        input_pd = input_df.to_pandas()
         
         # Encode categorical variables (Neighborhood)
-        input_encoded = pd.get_dummies(input_df, columns=['Neighborhood'], drop_first=True)
+        input_encoded = pl.get_dummies(input_df, columns=['Neighborhood'], separator='_').to_pandas()
         
         # Ensure the input has the same columns as the model was trained with
-        input_encoded = input_encoded.reindex(columns=feature_names, fill_value=0)
+        for col in feature_names:
+            if col not in input_encoded.columns:
+                input_encoded[col] = 0
+        input_encoded = input_encoded[feature_names]
         
         # Scale the features
         input_scaled = scaler.transform(input_encoded)

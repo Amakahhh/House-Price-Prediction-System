@@ -1,9 +1,9 @@
 House Price Prediction System - Submission Information
 ========================================================
 
-Name: [Your Full Name]
+Name: Ejike Chiamaka Sonnia
 
-Matric Number: [Your Matric Number]
+Matric Number: 22CG031853
 
 Machine Learning Algorithm Used: Random Forest Regressor
 
@@ -14,22 +14,3 @@ Example: https://your-app-name.onrender.com
 
 GitHub Repository Link: [Your GitHub repo link]
 Example: https://github.com/yourusername/HousePrice_Project_YourName_MatricNo
-
-========================================================
-
-INSTRUCTIONS FOR COMPLETION:
-
-1. Fill in your Name and Matric Number
-2. Train the model by running model_building.ipynb
-3. Test the Flask app locally (python app.py)
-4. Push code to GitHub
-5. Deploy using one of these options:
-   - Render.com (recommended)
-   - PythonAnywhere.com
-   - Streamlit Cloud
-   - Vercel
-6. Add the live URL to this file
-7. Add the GitHub repository link to this file
-8. Upload this file along with your project to Scorac
-
-========================================================
