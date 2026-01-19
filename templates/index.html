@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House Price Prediction System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🏠 House Price Prediction System</h1>
+            <p class="subtitle">Predict house prices using machine learning</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <!-- Left Column: Input Form -->
+                <section class="input-section">
+                    <h2>Property Features</h2>
+                    <form id="predictionForm">
+                        <div class="form-group">
+                            <label for="OverallQual">Overall Quality (1-10)</label>
+                            <input type="range" id="OverallQual" name="OverallQual" 
+                                   min="1" max="10" value="5" class="slider">
+                            <span id="qualValue">5</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="GrLivArea">Living Area (sq ft)</label>
+                            <input type="number" id="GrLivArea" name="GrLivArea" 
+                                   value="1500" min="100" step="50" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="TotalBsmtSF">Basement Area (sq ft)</label>
+                            <input type="number" id="TotalBsmtSF" name="TotalBsmtSF" 
+                                   value="1000" min="0" step="50" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="GarageCars">Garage Size (car capacity)</label>
+                            <input type="number" id="GarageCars" name="GarageCars" 
+                                   value="2" min="0" max="10" step="1" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="YearBuilt">Year Built</label>
+                            <input type="number" id="YearBuilt" name="YearBuilt" 
+                                   value="2000" min="1800" max="2024" step="1" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Neighborhood">Neighborhood</label>
+                            <select id="Neighborhood" name="Neighborhood" required>
+                                <option value="Ames">Ames</option>
+                                <option value="Edwards">Edwards</option>
+                                <option value="BriarDale">Briar Dale</option>
+                                <option value="OldTown">Old Town</option>
+                                <option value="Sawyer">Sawyer</option>
+                                <option value="NoRidge">No Ridge</option>
+                                <option value="NridgHt">Northridge Heights</option>
+                                <option value="SomerSet">Somerset</option>
+                                <option value="CollgCr">College Creek</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn-predict">Predict Price</button>
+                    </form>
+
+                    <!-- Model Info -->
+                    <div class="model-info">
+                        <h3>Model Information</h3>
+                        <p><strong>Algorithm:</strong> Random Forest Regressor</p>
+                        <p><strong>Features Used:</strong> 6 selected</p>
+                        <p><strong>Model Persistence:</strong> Joblib</p>
+                    </div>
+                </section>
+
+                <!-- Right Column: Results -->
+                <section class="result-section">
+                    <h2>Prediction Result</h2>
+                    <div id="resultContainer" class="result-container hidden">
+                        <div class="prediction-box">
+                            <p class="result-label">Predicted Price</p>
+                            <p class="result-value" id="predictionValue">$0.00</p>
+                        </div>
+
+                        <div class="result-details">
+                            <h3>Input Summary</h3>
+                            <div id="inputSummary" class="summary-grid">
+                                <!-- Filled by JavaScript -->
+                            </div>
+                        </div>
+
+                        <div class="result-message">
+                            <p id="resultMessage" class="success-message">
+                                ✓ Prediction successful! The model predicts this house price based on the provided features.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Loading Spinner -->
+                    <div id="loadingSpinner" class="spinner hidden">
+                        <div class="spinner-circle"></div>
+                        <p>Calculating prediction...</p>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div id="errorContainer" class="error-container hidden">
+                        <p id="errorMessage" class="error-message"></p>
+                    </div>
+
+                    <!-- Initial Message -->
+                    <div id="initialMessage" class="initial-message">
+                        <p>👈 Fill in the property details on the left and click "Predict Price" to see the estimated value.</p>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2026 House Price Prediction System | Machine Learning Model</p>
+        </footer>
+    </div>
+
+    <script>
+        // Update quality value display
+        const qualSlider = document.getElementById('OverallQual');
+        const qualValue = document.getElementById('qualValue');
+        qualSlider.addEventListener('input', function() {
+            qualValue.textContent = this.value;
+        });
+
+        // Handle form submission
+        document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // Hide messages and show loading spinner
+            document.getElementById('initialMessage').classList.add('hidden');
+            document.getElementById('errorContainer').classList.add('hidden');
+            document.getElementById('resultContainer').classList.add('hidden');
+            document.getElementById('loadingSpinner').classList.remove('hidden');
+
+            try {
+                // Get form data
+                const formData = new FormData(this);
+                const data = {
+                    OverallQual: formData.get('OverallQual'),
+                    GrLivArea: formData.get('GrLivArea'),
+                    TotalBsmtSF: formData.get('TotalBsmtSF'),
+                    GarageCars: formData.get('GarageCars'),
+                    YearBuilt: formData.get('YearBuilt'),
+                    Neighborhood: formData.get('Neighborhood')
+                };
+
+                // Make prediction request
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                // Hide loading spinner
+                document.getElementById('loadingSpinner').classList.add('hidden');
+
+                if (result.success) {
+                    // Display prediction result
+                    document.getElementById('predictionValue').textContent = result.formatted_prediction;
+                    
+                    // Display input summary
+                    const summaryHtml = `
+                        <div class="summary-item">
+                            <span>Quality:</span>
+                            <span>${data.OverallQual}/10</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Living Area:</span>
+                            <span>${data.GrLivArea} sq ft</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Basement:</span>
+                            <span>${data.TotalBsmtSF} sq ft</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Garage:</span>
+                            <span>${data.GarageCars} cars</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Year Built:</span>
+                            <span>${data.YearBuilt}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Neighborhood:</span>
+                            <span>${data.Neighborhood}</span>
+                        </div>
+                    `;
+                    document.getElementById('inputSummary').innerHTML = summaryHtml;
+
+                    // Show result container
+                    document.getElementById('resultContainer').classList.remove('hidden');
+                } else {
+                    // Display error
+                    document.getElementById('errorMessage').textContent = `Error: ${result.error || 'Failed to make prediction'}`;
+                    document.getElementById('errorContainer').classList.remove('hidden');
+                }
+            } catch (error) {
+                document.getElementById('loadingSpinner').classList.add('hidden');
+                document.getElementById('errorMessage').textContent = `Error: ${error.message}`;
+                document.getElementById('errorContainer').classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
