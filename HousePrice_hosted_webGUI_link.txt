@@ -7,10 +7,8 @@ Matric Number: 22CG031853
 
 Machine Learning Algorithm Used: Random Forest Regressor
 
-Model Persistence Method: Joblib (.pkl files)
+Model Persistence Method: Joblib
 
-Live URL of Hosted Application: [To be added after deployment]
-Example: https://your-app-name.onrender.com
+Live URL of Hosted Application: [PENDING - Will be updated after successful deployment]
 
-GitHub Repository Link: [Your GitHub repo link]
-Example: https://github.com/yourusername/HousePrice_Project_YourName_MatricNo
+GitHub Repository Link: https://github.com/Amakahhh/House-Price-Prediction-System
