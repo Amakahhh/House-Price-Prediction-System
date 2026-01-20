@@ -119,5 +119,8 @@ def health_check():
     return jsonify({'status': 'healthy', 'message': 'House Price Prediction API is running'})
 
 if __name__ == '__main__':
-    # For local development
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    # Use environment variable for PORT (required for deployment)
+    # Default to 5000 for local development
+    port = int(os.environ.get('PORT', 5000))
+    # Set debug=False for production/deployment safety
+    app.run(host='0.0.0.0', port=port, debug=False)
